@@ -6,7 +6,7 @@ import cherrypy
 
 import autosubliminal
 from autosubliminal import system
-from autosubliminal.db import ImdbIdCache, LastDownloads, TvdbIdCache, WantedItems
+from autosubliminal.db import ImdbIdCache, LastDownloads, TvdbIdCache, Items
 from autosubliminal.server.web import redirect
 from autosubliminal.templates.page import PageTemplate
 from autosubliminal.util.common import add_notification_message
@@ -61,7 +61,7 @@ class System(object):
     def flush_wanted_items(self):
         if get_wanted_queue_lock():
             # Flush db and wanted queue
-            WantedItems().flush_wanted_items()
+            Items().flush_wanted_items()
             autosubliminal.WANTEDQUEUE = []
             release_wanted_queue_lock()
             add_notification_message(

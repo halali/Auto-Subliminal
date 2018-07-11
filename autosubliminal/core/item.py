@@ -5,7 +5,7 @@ import datetime
 from autosubliminal.util.common import get_today
 
 # A subtitle will be searched on each run, as long as the file is not older than 4 weeks
-search_deadline = datetime.timedelta(weeks=4)
+search_deadline = datetime.timedelta(weeks=30)
 
 # Once a video file is older than the search deadline, it will only be searched once a week
 search_delta = datetime.timedelta(weeks=1)

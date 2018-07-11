@@ -36,3 +36,6 @@ cache/
 
 #Tox files
 .tox
+.vscode
+.vscode
+.vs

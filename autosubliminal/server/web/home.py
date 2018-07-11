@@ -5,7 +5,7 @@ from six import text_type
 
 import autosubliminal
 from autosubliminal import config, subchecker
-from autosubliminal.db import WantedItems
+from autosubliminal.db import Items
 from autosubliminal.server.web import redirect
 from autosubliminal.templates.page import PageTemplate
 from autosubliminal.util.common import add_notification_message, display_item, display_title, run_cmd, sanitize
@@ -45,7 +45,7 @@ class Home(object):
     def reset_wanted_item(self, wanted_item_index, **kwargs):
         # Get wanted item
         wanted_item = autosubliminal.WANTEDQUEUE[int(wanted_item_index)]
-        wanted_item_db = WantedItems().get_wanted_item(wanted_item['videopath'])
+        wanted_item_db = Items().get_wanted_item(wanted_item['videopath'])
         for key in wanted_item_db:
             wanted_item[key] = wanted_item_db[key]
         # Only return updatable fields

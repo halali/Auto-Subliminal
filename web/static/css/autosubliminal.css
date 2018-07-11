@@ -426,6 +426,11 @@ table.tablesorter .filtered {
     width: auto;
 }
 
+.available-icon {
+    height: 18px;
+    width: 18px;
+}
+
 .main-column {
     color: #333333;
     font-weight: bold;

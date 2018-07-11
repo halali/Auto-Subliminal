@@ -6,12 +6,14 @@ from six import text_type
 
 import autosubliminal
 from autosubliminal.util.common import sanitize
+# from autosubliminal.db import Items
 
 log = logging.getLogger(__name__)
 
 
 def skip_show(show_name, season, episode):
     """Check if a show should be skipped."""
+    # item_to_skip = Items().get_item(videopath)
     show_name_sanitized = sanitize(show_name)
     for x in autosubliminal.SKIPSHOW:
         if show_name_sanitized == sanitize(x):
@@ -19,9 +21,15 @@ def skip_show(show_name, season, episode):
             for s in autosubliminal.SKIPSHOW[x].split(','):
                 if s == '00':
                     log.debug('Found all season match in skipshow, skipping all seasons for %s', show_name)
+                    # if item_to_skip:
+                    #     item_to_skip['skipped'] = True
+                    #     Items().skip_item(item_to_skip)
                     return True
                 elif int(s) == int(season):
                     log.debug('Found season match in skipshow, skipping season %s for %s', season, show_name)
+                    # if item_to_skip:
+                    #     item_to_skip['skipped'] = True
+                    #     Items().skip_item(item_to_skip)
                     return True
 
 

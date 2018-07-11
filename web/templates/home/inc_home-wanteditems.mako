@@ -60,6 +60,7 @@
                         <th>Quality</th>
                         <th>Codec</th>
                         <th>Group</th>
+						<th>Available</th>
                         <th>Lang</th>
                         <th>Time</th>
                     </tr>
@@ -232,6 +233,15 @@
                                 <td class="wanted-item-releasegrp wrapped">
                                     ${display_item(item, 'releasegrp', 'N/A', True)}
                                 </td>
+								% if item['available'] is True:
+									<td class="wanted-item-available">
+										<img src="/images/availability/true.png" class="available-icon" title="Available">
+									</td>
+								% else:
+									<td class="wanted-item-available">
+										<img src="/images/availability/false.png" class="available-icon" title="Available">
+									</td>
+								% endif
                                 <td class="wanted-item-languages">
                                     % for lang in item['languages']:
                                     <% imageurl = autosubliminal.WEBROOT + "/images/flags/language/" + lang + ".png" %>

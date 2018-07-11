@@ -17,11 +17,13 @@ def dict_factory(cursor, row):
     return d
 
 
-def dict_factory_wanted_items(cursor, row):
+def dict_factory_items(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
         # Languages should be returned as a list (so let's split the comma separated string)
         if col[0] == 'languages':
+            d[col[0]] = row[idx].split(',')
+        elif col[0] == 'dlanuages':
             d[col[0]] = row[idx].split(',')
         else:
             # Use default value from database
@@ -92,97 +94,209 @@ class ImdbIdCache(object):
         connection.close()
 
 
-class WantedItems(object):
+class Items(object):
     def __init__(self):
-        self._query_get_all = 'select * from wanted_items order by timestamp desc'
-        self._query_get = 'select * from wanted_items where videopath=?'
-        self._query_set = 'insert into wanted_items values (NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-        self._query_update = 'update wanted_items set videopath=?, timestamp=?, languages=?, type=?, title=?, ' \
+        self._query_get_wanted = 'select * from items where wanted = %s and skipped = %s order by timestamp desc'
+        self._query_get_all = 'select * from items order by timestamp desc'
+        self._query_get = 'select * from items where videopath=?'
+        self._query_set = 'insert into items values (NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+        self._query_update_wanted = 'update items set timestamp=?, languages=?, type=?, title=?, ' \
+                                    'year=?, season=?, episode=?, quality=?, source=?, codec=?, releasegrp=?, ' \
+                                    'tvdbid=?, imdbid=?, available=?, wanted=?, skipped=? where videopath=?'
+        self._query_update = 'update items set timestamp=?, dlanguages=?, type=?, title=?, ' \
                              'year=?, season=?, episode=?, quality=?, source=?, codec=?, releasegrp=?, tvdbid=?, ' \
-                             'imdbid=? where id=?'
-        self._query_delete = 'delete from wanted_items where videopath=?'
-        self._query_flush = 'delete from wanted_items'
+                             'imdbid=?, available=?, wanted=?, skipped=? where videopath=?'
+        self._query_delete = 'delete from items where videopath=?'
+        self._query_update_subtitle = 'update items set subtitles=? where videopath=?'
+        self._query_skip_item = 'update items set skipped=? where videopath=?'
+        self._query_skip_show = 'update items set skipped=? where title=?'
+        self._query_skip_season = 'update items set skipped=? where title=? and season=?'
+        self._query_delete_wanted = 'delete from items where videopath=?'
+        self._query_flush = 'delete from items'
 
-    def get_wanted_items(self):
+    def get_items(self):
         connection = sqlite3.connect(autosubliminal.DBFILE)
-        connection.row_factory = dict_factory_wanted_items
+        connection.row_factory = dict_factory_items
         cursor = connection.cursor()
         cursor.execute(self._query_get_all)
         result_list = cursor.fetchall()
         connection.close()
         return result_list
 
-    def get_wanted_item(self, video_path):
+    def get_wanted_items(self):
         connection = sqlite3.connect(autosubliminal.DBFILE)
-        connection.row_factory = dict_factory_wanted_items
+        connection.row_factory = dict_factory_items
+        cursor = connection.cursor()
+        cursor.execute(self._query_get_wanted % ('1', '0'))
+        result_list = cursor.fetchall()
+        connection.close()
+        return result_list
+
+    def get_item(self, video_path):
+        connection = sqlite3.connect(autosubliminal.DBFILE)
+        connection.row_factory = dict_factory_items
         cursor = connection.cursor()
         cursor.execute(self._query_get, [video_path])
-        wanted_item = cursor.fetchone()
+        item = cursor.fetchone()
         connection.close()
-        return wanted_item
+        return item
 
-    def set_wanted_item(self, wanted_item):
+    def set_item(self, item):
         connection = sqlite3.connect(autosubliminal.DBFILE)
         cursor = connection.cursor()
 
         # Can be unavailable in dict
-        if 'tvdbid' not in wanted_item:
-            wanted_item['tvdbid'] = None
-        if 'imdbid' not in wanted_item:
-            wanted_item['imdbid'] = None
+        if 'tvdbid' not in item:
+            item['tvdbid'] = None
+        if 'imdbid' not in item:
+            item['imdbid'] = None
+        if 'subtitles' not in item:
+            item['subtitles'] = ''
+        if 'available' not in item:
+            item['available'] = False
+        if 'wanted' not in item:
+            item['wanted'] = False
+        if 'skipped' not in item:
+            item['skipped'] = False
 
         cursor.execute(self._query_set, [
-            wanted_item['videopath'],
-            wanted_item['timestamp'],
+            item['videopath'],
+            ','.join(item['subtitles']),
+            item['timestamp'],
             # Store languages as comma separated string
-            ','.join(wanted_item['languages']),
-            wanted_item['type'],
-            wanted_item['title'],
-            wanted_item['year'],
-            wanted_item['season'],
-            wanted_item['episode'],
-            wanted_item['quality'],
-            wanted_item['source'],
-            wanted_item['codec'],
-            wanted_item['releasegrp'],
-            wanted_item['tvdbid'],
-            wanted_item['imdbid']])
+            ','.join(item['languages']),
+            # Store languages as comma separated string
+            ','.join(item['dlanguages']),
+            item['type'],
+            item['title'],
+            item['year'],
+            item['season'],
+            item['episode'],
+            item['quality'],
+            item['source'],
+            item['codec'],
+            item['releasegrp'],
+            item['tvdbid'],
+            item['imdbid'],
+            item['available'],
+            item['wanted'],
+            item['skipped']])
+        connection.commit()
+        connection.close()
+
+    def delete_item(self, item):
+        connection = sqlite3.connect(autosubliminal.DBFILE)
+        cursor = connection.cursor()
+        cursor.execute(self._query_delete, [item['videopath']])
         connection.commit()
         connection.close()
 
     def delete_wanted_item(self, wanted_item):
         connection = sqlite3.connect(autosubliminal.DBFILE)
         cursor = connection.cursor()
-        cursor.execute(self._query_delete, [wanted_item['videopath']])
+        cursor.execute(self._query_delete_wanted, [wanted_item['videopath']])
         connection.commit()
         connection.close()
 
-    def update_wanted_item(self, wanted_item):
+    def skip_item(self, wanted_item):
+        connection = sqlite3.connect(autosubliminal.DBFILE)
+        cursor = connection.cursor()
+        cursor.execute(self._query_skip_item, [wanted_item['skipped'], wanted_item['videopath']])
+        connection.commit()
+        connection.close()
+
+    def update_subtitle(self, wanted_item):
+        connection = sqlite3.connect(autosubliminal.DBFILE)
+        cursor = connection.cursor()
+        cursor.execute(self._query_update_subtitle, [wanted_item['subtitles'], wanted_item['videopath']])
+        connection.commit()
+        connection.close()
+
+    def skip_show(self, wanted_item):
+        connection = sqlite3.connect(autosubliminal.DBFILE)
+        cursor = connection.cursor()
+        cursor.execute(self._query_skip_show, [wanted_item['skipped'], wanted_item['title']])
+        connection.commit()
+        connection.close()
+
+    def skip_season(self, wanted_item):
+        connection = sqlite3.connect(autosubliminal.DBFILE)
+        cursor = connection.cursor()
+        cursor.execute(self._query_skip_season, [wanted_item['skipped'], wanted_item['title'], wanted_item['season']])
+        connection.commit()
+        connection.close()
+
+    def update_wanted_item(self, item):
         connection = sqlite3.connect(autosubliminal.DBFILE)
         cursor = connection.cursor()
 
         # Can be unavailable in dict
-        if 'tvdbid' not in wanted_item:
-            wanted_item['tvdbid'] = None
-        if 'imdbid' not in wanted_item:
-            wanted_item['imdbid'] = None
+        if 'tvdbid' not in item:
+            item['tvdbid'] = None
+        if 'imdbid' not in item:
+            item['imdbid'] = None
+        if 'available' not in item:
+            item['available'] = False
+        if 'wanted' not in item:
+            item['wanted'] = False
+        if 'skipped' not in item:
+            item['skipped'] = False
+
+        cursor.execute(self._query_update_wanted, [
+            item['timestamp'],
+            ','.join(item['languages']),
+            item['type'],
+            item['title'],
+            item['year'],
+            item['season'],
+            item['episode'],
+            item['quality'],
+            item['source'],
+            item['codec'],
+            item['releasegrp'],
+            item['tvdbid'],
+            item['imdbid'],
+            item['available'],
+            item['wanted'],
+            item['skipped'],
+            item['videopath']])
+        connection.commit()
+        connection.close()
+
+    def update_item(self, item):
+        connection = sqlite3.connect(autosubliminal.DBFILE)
+        cursor = connection.cursor()
+
+        # Can be unavailable in dict
+        if 'tvdbid' not in item:
+            item['tvdbid'] = None
+        if 'imdbid' not in item:
+            item['imdbid'] = None
+        if 'available' not in item:
+            item['available'] = False
+        if 'wanted' not in item:
+            item['wanted'] = False
+        if 'skipped' not in item:
+            item['skipped'] = False
 
         cursor.execute(self._query_update, [
-            wanted_item['videopath'],
-            wanted_item['timestamp'],
-            ','.join(wanted_item['languages']),
-            wanted_item['type'],
-            wanted_item['title'],
-            wanted_item['year'],
-            wanted_item['season'],
-            wanted_item['episode'],
-            wanted_item['quality'],
-            wanted_item['source'],
-            wanted_item['codec'],
-            wanted_item['releasegrp'],
-            wanted_item['tvdbid'],
-            wanted_item['imdbid'],
-            wanted_item['id']])
+            item['timestamp'],
+            ','.join(item['dlanguages']),
+            item['type'],
+            item['title'],
+            item['year'],
+            item['season'],
+            item['episode'],
+            item['quality'],
+            item['source'],
+            item['codec'],
+            item['releasegrp'],
+            item['tvdbid'],
+            item['imdbid'],
+            item['available'],
+            item['wanted'],
+            item['skipped'],
+            item['videopath']])
         connection.commit()
         connection.close()
 
@@ -260,9 +374,16 @@ def create():
         cursor.execute(query)
         connection.commit()
 
+        query = 'CREATE TABLE items (id INTEGER PRIMARY KEY, videopath TEXT, subtitles TEXT, timestamp DATETIME, ' \
+                'languages TEXT, dlanguages TEXT, type TEXT, title TEXT, year TEXT, season TEXT, episode TEXT, ' \
+                'quality TEXT, source TEXT, codec TEXT, releasegrp TEXT, tvdbid TEXT, imdbid TEXT, available BLOB, ' \
+                'wanted BLOB, skipped BLOB)'
+        cursor.execute(query)
+        connection.commit()
+
         query = 'CREATE TABLE wanted_items (id INTEGER PRIMARY KEY, videopath TEXT, timestamp DATETIME, ' \
                 'languages TEXT, type TEXT, title TEXT, year TEXT, season TEXT, episode TEXT, quality TEXT, ' \
-                'source TEXT, codec TEXT, releasegrp TEXT, tvdbid TEXT, imdbid TEXT)'
+                'source TEXT, codec TEXT, releasegrp TEXT, tvdbid TEXT, imdbid TEXT, available BLOB)'
         cursor.execute(query)
         connection.commit()
 
@@ -377,6 +498,15 @@ def upgrade(from_version, to_version):
             )
             # Update database version
             cursor.execute('UPDATE info SET database_version = %d WHERE database_version = %d' % (7, 6))
+            connection.commit()
+            connection.close()
+        if from_version == 7 and to_version == 8:
+            connection = sqlite3.connect(autosubliminal.DBFILE)
+            cursor = connection.cursor()
+            # Add available to wanted_items
+            cursor.execute('ALTER TABLE wanted_items ADD COLUMN %s BLOB' % 'available')
+            # Update database version
+            cursor.execute('UPDATE info SET database_version = %d WHERE database_version = %d' % (8, 7))
             connection.commit()
             connection.close()
 
