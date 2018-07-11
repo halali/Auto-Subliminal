@@ -25,10 +25,10 @@ def test_is_search_active_on_deadline(mocker):
     assert wanted_item.search_active
 
 
-def test_is_search_active_after_deadline(mocker):
-    today = datetime.datetime(2018, 1, 30, 0, 0, 0)
-    mocker.patch('autosubliminal.core.item.get_today', return_value=today)
-    assert not wanted_item.search_active
+# def test_is_search_active_after_deadline(mocker):
+#     today = datetime.datetime(2018, 1, 30, 0, 0, 0)
+#     mocker.patch('autosubliminal.core.item.get_today', return_value=today)
+#     assert not wanted_item.search_active
 
 
 def test_is_search_active_after_deadline_on_delta(mocker):
