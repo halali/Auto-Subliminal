@@ -213,9 +213,6 @@ def search_subtitle(wanted_item_index, lang):
                                 content_preview = 'Problem with parsing the first 28 and/or last 30 lines of the file.'
                         sub['content_preview'] = content_preview
                         subs.append(sub)
-                    else:
-                        wanted_item['available'] = False
-                        Items().update_wanted_item(wanted_item)
 
     # Release wanted queue lock
     release_wanted_queue_lock()
