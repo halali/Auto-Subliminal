@@ -1,11 +1,11 @@
-Auto-Subliminal [![License](https://img.shields.io/github/license/h3llrais3r/Auto-Subliminal.svg)](https://github.com/h3llrais3r/Auto-Subliminal/blob/master/LICENSE)
+Auto-Subliminal [![License](https://img.shields.io/github/license/halali/Auto-Subliminal.svg)](https://github.com/halali/Auto-Subliminal/blob/master/LICENSE)
 ===============
 
 | Status | Master | Development |
 | -------|:------:| -----------:|
-| Travis CI build status | [![Travis CI build status](https://travis-ci.org/h3llrais3r/Auto-Subliminal.svg?branch=master)](https://travis-ci.org/h3llrais3r/Auto-Subliminal) | [![Travis CI build status](https://travis-ci.org/h3llrais3r/Auto-Subliminal.svg?branch=development)](https://travis-ci.org/h3llrais3r/Auto-Subliminal) |
-| Coverage status | [![Coverage Status](https://coveralls.io/repos/github/h3llrais3r/Auto-Subliminal/badge.svg?branch=master)](https://coveralls.io/github/h3llrais3r/Auto-Subliminal?branch=master) | [![Coverage Status](https://coveralls.io/repos/github/h3llrais3r/Auto-Subliminal/badge.svg?branch=development)](https://coveralls.io/github/h3llrais3r/Auto-Subliminal?branch=development) |
-| Requirements status | [![Requirements Status](https://requires.io/github/h3llrais3r/Auto-Subliminal/requirements.svg?branch=master)](https://requires.io/github/h3llrais3r/Auto-Subliminal/requirements/?branch=master) | [![Requirements Status](https://requires.io/github/h3llrais3r/Auto-Subliminal/requirements.svg?branch=development)](https://requires.io/github/h3llrais3r/Auto-Subliminal/requirements/?branch=development) |
+| Travis CI build status | [![Travis CI build status](https://travis-ci.org/halali/Auto-Subliminal.svg?branch=master)](https://travis-ci.org/halali/Auto-Subliminal) | [![Travis CI build status](https://travis-ci.org/halali/Auto-Subliminal.svg?branch=development)](https://travis-ci.org/halali/Auto-Subliminal) |
+| Coverage status | [![Coverage Status](https://coveralls.io/repos/github/halali/Auto-Subliminal/badge.svg?branch=master)](https://coveralls.io/github/halali/Auto-Subliminal?branch=master) | [![Coverage Status](https://coveralls.io/repos/github/halali/Auto-Subliminal/badge.svg?branch=development)](https://coveralls.io/github/halali/Auto-Subliminal?branch=development) |
+| Requirements status | [![Requirements Status](https://requires.io/github/halali/Auto-Subliminal/requirements.svg?branch=master)](https://requires.io/github/halali/Auto-Subliminal/requirements/?branch=master) | [![Requirements Status](https://requires.io/github/halali/Auto-Subliminal/requirements.svg?branch=development)](https://requires.io/github/halali/Auto-Subliminal/requirements/?branch=development) |
 
 About
 -----
